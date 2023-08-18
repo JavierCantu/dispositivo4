@@ -1,0 +1,504 @@
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Calculadora de Baterías</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <!--<a class="navbar-brand" th:href="@{/baterias}">Ingreso de dispositivo</a>-->            
+            <a class="navbar-brand" th:href="@{/calculadora}">Calculadora Bateria</a>
+            <a class="navbar-brand" th:href="@{/sensores}">Calculadora Sensores</a>
+<!--            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <span class="navbar-text">Bienvenido, <span id="nicktext">Usuario</span>!</span>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-danger" onclick="cerrarSesion()">Cerrar Sesión</button>
+                    </li>
+                </ul>
+            </div>-->
+        </nav>
+        <div class="container">
+            <h2 class="center-text">Calculador de Baterias por dispositivos</h2>
+
+
+            <!-- Agregar combo box, botón de agregar y tabla de dispositivos agregados -->
+            <div class="row">
+                <div class="col-md-4">
+                    <label for="selectBaterias">Seleccione el dispositivo:</label>
+                    <select id="selectBaterias" class="form-control">
+                        <!-- Opciones de baterías se agregarán aquí dinámicamente -->
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="cantidadInput">Cantidad:</label>
+                        <input type="number" id="cantidadInput" class="form-control"/>
+                    </div>
+                </div>
+
+                <div class="col-md-2">                        
+                    <label style="min-height: 2.9em;" class="empty-label" for="button"></label>
+                    <button class="btn btn-success" onclick="agregarDispositivo()">Agregar</button>
+                </div>
+            </div>
+
+            <h4 style="text-align: center" class="center-text">Calculo de baterias de panel Ms-9600Ls</h4>
+
+            <table id="tablaDispositivos" class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Cantidad</th>
+                        <th>Corriente en Espera</th>
+                        <th>Total Corriente en Espera</th>
+                        <th>Corriente en Alarma</th>
+                        <th>Total Corriente en Alarma</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td>Totales</td>
+                        <td id="totalCantidad">0</td>
+                        <td>Total en Espera</td>
+                        <td id="totalCorrienteEspera">0</td>
+                        <td>Total en Alarma</td>
+                        <td id="totalCorrienteAlarma">0</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <h6 style="text-align: center" class="center-text">CALCULOS</h6>
+            <div class="row">
+
+                <div class="col-md-4">
+                    <label style="text-align: right"  >Total de amperes en espera:</label>
+                </div>
+                <div class="col-md-2">
+                    <span id="totalCorrienteEsperaText">0</span>
+                </div>
+                <div class="col-md-2">
+                    <label>X</label>
+
+                </div>
+                <div class="col-md-2">
+                    <label>24 horas =</label>
+                </div>
+                <div class="col-md-1">
+                    <span id="totalCorrienteEspera24hText">0</span>
+                </div>
+                <div class="col-md-1">
+                    <label>AH</label>
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Total de amperes en alarma:</label>
+
+                </div>
+                <div class="col-md-2">
+                    <span id="totalCorrienteAlarmaText">0</span>
+
+                </div>
+                <div class="col-md-2">
+                    <label>X</label>
+
+                </div>
+                <div class="col-md-2">
+                    <label>15 min =</label>
+
+                </div>
+                <div class="col-md-1">
+                    <span id="totalCorrienteAlarma15minText">0</span>        
+
+                </div>
+                <div class="col-md-1">
+                    <label>AH</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-9">
+                    <h6 style="text-align: end" class="center-text">TOTAL</h6>
+                </div>
+                <div class="col-md-1">
+                    <label>=</label>
+                </div>
+                <div class="col-md-1">
+                    <span id="totalEsperado">0</span>        
+                </div>
+                <div class="col-md-1">
+                    <label>AH</label>
+                </div>
+            </div>
+            <br/>
+            <div class="row">
+                <div class="col-md-9">
+                    <h6 style="text-align: end" class="center-text">TOTAL DE LA BATERIA SUMISTRADA</h6>
+                </div>
+                <div class="col-md-1">
+                    <label>=</label>
+                </div>
+                <div class="col-md-1">
+                    <span id="totalBateria">18.00</span>        
+                </div>
+                <div class="col-md-1">
+                    <label>AH</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-9">
+                    <h6 style="text-align: end" class="center-text">BATERIA TOTAL DESPUES DE UN FACTOR DE SEGURIDAD DEL 20%</h6>
+                </div>
+                <div class="col-md-1">
+                    <label>=</label>
+                </div>
+                <div class="col-md-1">
+                    <span id="totalBateria">15.00</span>        
+                </div>
+                <div class="col-md-1">
+                    <label>AH</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-9">
+                    <h6 style="text-align: end" class="center-text">TOTAL DE BATERIA DE RESPALDO REQUERIDA</h6>
+                </div>
+                <div class="col-md-1">
+                    <label>=</label>
+                </div>
+                <div class="col-md-1">
+                    <span id="totalEsperado1">0</span>        
+                </div>
+                <div class="col-md-1">
+                    <label>AH</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-9">
+                    <h6 style="text-align: end" class="center-text">BATERIA TOTAL DE RESPALDO</h6>
+                </div>
+                <div class="col-md-1">
+                    <label>=</label>
+                </div>
+                <div class="col-md-1">
+                    <span id="totalFinal">0</span>        
+                </div>
+                <div class="col-md-1">
+                    <label>AH</label>
+                </div>
+            </div>
+        </div>
+        <script>
+            var selectBaterias = document.getElementById("selectBaterias");
+            var tablaDispositivos = document.getElementById("tablaDispositivos").getElementsByTagName('tbody')[0];
+
+            window.onload = function () {
+//                obtenerBaterias();
+                cargarBateriasEnComboBox(); // Llamada para cargar las opciones en el combo box
+            };
+
+
+            function cargarBateriasEnComboBox() {
+                fetch('/bateria')
+                        .then(response => response.json())
+                        .then(baterias => {
+                            var combo = document.getElementById('selectBaterias');
+
+                            // Limpiar el combo antes de agregar las opciones
+                            combo.innerHTML = '<option value="">Seleccionar...</option>';
+
+                            baterias.forEach(bateria => {
+                                var option = document.createElement('option');
+                                option.value = bateria.id_bateria;
+                                option.textContent = bateria.nombre;
+
+                                // Agregar atributos a la opción
+                                option.setAttribute("cantidad", bateria.cantidad);
+                                option.setAttribute("data-corriente-espera", bateria.corri_espera);
+                                option.setAttribute("data-corriente-alarma", bateria.corri_alarma);
+                                option.setAttribute("data-total-corriente-espera", bateria.total_corri_espera);
+                                option.setAttribute("data-total-corriente-alarma", bateria.total_corri_alarma);
+
+                                combo.appendChild(option);
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error en la solicitud:', error);
+                        });
+            }
+
+            function agregarDispositivo() {
+                var cantidadInput = document.getElementById("cantidadInput").value;
+                var selectedOption = selectBaterias.options[selectBaterias.selectedIndex];
+                if (!selectedOption)
+                    return;
+                if (!selectedOption || selectedOption.text === "Seleccionar...") {
+                    alert("Seleccione una opción válida.");
+                    return;
+                }
+                if (!cantidadInput || isNaN(cantidadInput) || !Number.isInteger(parseFloat(cantidadInput))|| cantidadInput <=0) {
+                    alert("Ingrese una cantidad válida (valor entero).");
+                    return;
+                }
+                
+
+                // Obtener los valores de la opción seleccionada
+                var id_bateria = selectedOption.value;
+                var nombre = selectedOption.text;
+
+
+                var cantidad = parseInt(cantidadInput);
+                var corrienteEspera = parseFloat(selectedOption.getAttribute("data-corriente-espera"));
+                var corrienteAlarma = parseFloat(selectedOption.getAttribute("data-corriente-alarma"));
+                var totalCorrienteEsperaReal = corrienteEspera * cantidad;
+                var totalCorrienteAlarmaReal = corrienteAlarma* cantidad ;
+
+                // Crear fila y celdas para agregar al grid
+                var fila = tablaDispositivos.insertRow();
+                var nombreCell = fila.insertCell(0);
+                var cantidadCell = fila.insertCell(1);
+                var corrienteEsperaCell = fila.insertCell(2);
+                var totalCorrienteEsperaCell = fila.insertCell(3);
+                var corrienteAlarmaCell = fila.insertCell(4);
+                var totalCorrienteAlarmaCell = fila.insertCell(5);
+
+
+
+                // Llenar celdas con los valores
+                nombreCell.textContent = nombre;
+                cantidadCell.textContent = cantidad;
+                corrienteEsperaCell.textContent = corrienteEspera;
+                corrienteAlarmaCell.textContent = corrienteAlarma;
+                totalCorrienteEsperaCell.textContent = totalCorrienteEsperaReal;
+                totalCorrienteAlarmaCell.textContent = totalCorrienteAlarmaReal;
+
+                // Actualizar totales
+                actualizarTotales();
+
+                // Limpiar la selección del combo
+                selectBaterias.selectedIndex = 0;
+            }
+            function actualizarTotales() {
+                var totalCantidad = 0;
+                var totalCorrienteEspera = 0;
+                var totalCorrienteAlarma = 0;
+
+                var filas = tablaDispositivos.getElementsByTagName('tr');
+                for (var i = 0; i < filas.length; i++) {
+                    var fila = filas[i];
+                    var cantidad = parseInt(fila.cells[1].textContent);
+                    var CorrienteEspera = parseFloat(fila.cells[3].textContent);
+                    var CorrienteAlarma = parseFloat(fila.cells[5].textContent);
+
+                    totalCantidad += cantidad;
+                    totalCorrienteEspera += CorrienteEspera;
+                    totalCorrienteAlarma += CorrienteAlarma;
+                }
+
+                // Actualizar los elementos de totales en el footer
+                document.getElementById("totalCantidad").textContent = totalCantidad;
+                document.getElementById("totalCorrienteEspera").textContent = totalCorrienteEspera;
+                document.getElementById("totalCorrienteAlarma").textContent = totalCorrienteAlarma;
+
+                // Calcular y actualizar los valores en los elementos span
+                document.getElementById("totalCorrienteEsperaText").textContent = totalCorrienteEspera.toFixed(2);
+                document.getElementById("totalCorrienteEspera24hText").textContent = (totalCorrienteEspera * 24).toFixed(2);
+                document.getElementById("totalCorrienteAlarmaText").textContent = totalCorrienteAlarma.toFixed(2);
+                document.getElementById("totalCorrienteAlarma15minText").textContent = (totalCorrienteAlarma * 0.249).toFixed(2);
+                document.getElementById("totalEsperado").textContent = ((totalCorrienteEspera * 24) + (totalCorrienteAlarma * 0.249)).toFixed(2);
+                document.getElementById("totalEsperado1").textContent = ((totalCorrienteEspera * 24) + (totalCorrienteAlarma * 0.249)).toFixed(2);
+
+                document.getElementById("totalFinal").textContent = (15 - ((totalCorrienteEspera * 24) + (totalCorrienteAlarma * 0.249))).toFixed(2);
+
+
+            }
+
+
+
+//            function obtenerBaterias() {
+//                fetch('/bateria')  // Realiza una solicitud GET a la ruta '/bateria'
+//                        .then(response => response.json())  // Parsea la respuesta a JSON
+//                        .then(baterias => {
+//                            var tablaBaterias = document.getElementById('tablaBateria').getElementsByTagName('tbody')[0];
+//
+//                            // Limpiar la tabla antes de agregar los nuevos datos
+//                            tablaBaterias.innerHTML = '';
+//
+//                            baterias.forEach(bateria => {
+//                                var fila = tablaBaterias.insertRow();
+//
+//                                // Crear las celdas de la fila con los datos de la batería
+//                                var idCell = fila.insertCell(0);
+//                                var nombreCell = fila.insertCell(1);
+//                                var cantidadCell = fila.insertCell(2);
+//                                var corrienteEsperaCell = fila.insertCell(3);
+//                                var corrienteAlarmaCell = fila.insertCell(4);
+//                                var totalCorrienteEsperaCell = fila.insertCell(5);
+//                                var totalCorrienteAlarmaCell = fila.insertCell(6);
+//                                var accionesCell = fila.insertCell(7); // Nueva celda para acciones
+//
+//                                // Llenar las celdas con los datos
+//                                idCell.innerHTML = bateria.id_bateria; // Asegúrate de tener una propiedad 'id' en tus objetos de batería
+//                                nombreCell.innerHTML = bateria.nombre;
+//                                cantidadCell.innerHTML = bateria.cantidad;
+//                                corrienteEsperaCell.innerHTML = bateria.corri_espera;
+//                                corrienteAlarmaCell.innerHTML = bateria.corri_alarma;
+//                                totalCorrienteEsperaCell.innerHTML = bateria.total_corri_espera;
+//                                totalCorrienteAlarmaCell.innerHTML = bateria.total_corri_alarma;
+//
+//                                accionesCell.innerHTML = `
+//                    <button class="btn btn-sm btn-primary" onclick="editarBateria(${bateria.id_bateria})">Editar</button>
+//                    <button class="btn btn-sm btn-danger" onclick="eliminarBateria(${bateria.id_bateria})">Eliminar</button>
+//                `;
+//                            });
+//                        })
+//                        .catch(error => {
+//                            console.error('Error en la solicitud:', error);
+//                        });
+//            }
+
+            function eliminarBateria(idBateria) {
+                fetch(`/bateria/${idBateria}`, {
+                    method: 'DELETE'
+                })
+                        .then(response => {
+                            if (response.ok) {
+                                alert('Batería eliminada correctamente');
+                                obtenerBaterias(); // Actualizar la tabla después de eliminar
+                            } else {
+                                console.log('Error al eliminar la batería');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error en la solicitud:', error);
+                        });
+            }
+
+            function calcularBateria() {
+                var idBateriaInput = document.getElementById("id_bateria").value;
+                var nombreInput = document.getElementById("nombreBateriaInput").value;
+                var cantidadInput = document.getElementById("cantidadInput").value;
+                var corrienteEsperaInput = document.getElementById("corrienteEsperaInput").value;
+                var corrienteAlarmaInput = document.getElementById("corrienteAlarmaInput").value;
+
+                if (nombreInput === "" || cantidadInput === "" || corrienteEsperaInput === "" || corrienteAlarmaInput === "") {
+                    alert("Por favor, complete todos los campos.");
+                    return;
+                }
+
+                if (!Number.isInteger(Number(cantidadInput))) {
+                    alert("La cantidad debe ser un número entero.");
+                    return;
+                }
+
+                var totalcorrienteEspera = corrienteEsperaInput * cantidadInput;
+                var totalcorrienteAlarma = corrienteAlarmaInput * cantidadInput;
+
+                var bateria = {
+                    id_bateria: idBateriaInput,
+                    nombre: nombreInput,
+                    cantidad: parseInt(cantidadInput),
+                    corri_espera: parseFloat(corrienteEsperaInput),
+                    corri_alarma: parseFloat(corrienteAlarmaInput),
+                    total_corri_espera: totalcorrienteEspera,
+                    total_corri_alarma: totalcorrienteAlarma
+                };
+
+                if (idBateriaInput) {
+                    fetch(`/bateria`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(bateria)
+                    })
+                            .then(response => {
+                                if (response.ok) {
+                                    alert('Batería actualizada correctamente');
+                                    obtenerBaterias();
+                                    limpiarFormulario();
+                                } else {
+                                    console.log('Error al actualizar la batería');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error en la solicitud:', error);
+                            });
+                } else {
+                    fetch('/bateria', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(bateria)
+                    })
+                            .then(response => {
+                                if (response.ok) {
+                                    alert('Bateria insertada correctamente');
+                                    obtenerBaterias();
+                                } else {
+                                    console.log('Error al insertar la batería');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error en la solicitud:', error);
+                            });
+                }
+            }
+
+            function editarBateria(idBateria) {
+                // Realizar una solicitud GET para obtener los datos de la batería por su ID
+                fetch(`/bateria/${idBateria}`)
+                        .then(response => response.json())
+                        .then(bateria => {
+                            var idInput = document.getElementById("id_bateria");
+                            var nombreInput = document.getElementById("nombreBateriaInput");
+                            var cantidadInput = document.getElementById("cantidadInput");
+                            var corrienteEsperaInput = document.getElementById("corrienteEsperaInput");
+                            var corrienteAlarmaInput = document.getElementById("corrienteAlarmaInput");
+
+                            idInput.value = bateria.id_bateria;
+                            nombreInput.value = bateria.nombre;
+                            cantidadInput.value = bateria.cantidad;
+                            corrienteEsperaInput.value = bateria.corri_espera;
+                            corrienteAlarmaInput.value = bateria.corri_alarma;
+
+                            // Cambiar el texto del botón a "Actualizar"
+                            var botonCalcular = document.querySelector("button[type='submit']");
+                            botonCalcular.textContent = "Actualizar";
+
+                        })
+                        .catch(error => {
+                            console.error('Error en la solicitud:', error);
+                        });
+            }
+            function cerrarSesion() {
+                // Redirige a la página de inicio de sesión
+                window.location.href = "cerrar-sesion";
+            }
+
+            function limpiarFormulario() {
+                var idBateriaInput = document.getElementById("id_bateria");
+                var nombreBateriaInput = document.getElementById("nombreBateriaInput");
+                var cantidadInput = document.getElementById("cantidadInput");
+                var corrienteEsperaInput = document.getElementById("corrienteEsperaInput");
+                var corrienteAlarmaInput = document.getElementById("corrienteAlarmaInput");
+
+                idBateriaInput.value = "";
+                nombreBateriaInput.value = "";
+                cantidadInput.value = "";
+                corrienteEsperaInput.value = "";
+                corrienteAlarmaInput.value = "";
+
+                var calcularButton = document.getElementById("calcularButton");
+                calcularButton.textContent = "Calcular";
+            }
+        </script>
+    </body>
+</html>

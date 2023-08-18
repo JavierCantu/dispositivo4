@@ -1,0 +1,274 @@
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Ingreso de Dispositivos</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" th:href="@{/baterias}">Ingreso de dispositivo</a>            
+            <!--            <a class="navbar-brand" th:href="@{/calculadora}">Calculadora Bateria</a>
+                        <a class="navbar-brand" th:href="@{/sensores}">Calculadora Sensores</a>-->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <span class="navbar-text">Bienvenido, <span id="nicktext" th:text="${nickUsuario}">Usuario</span>!</span>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-danger" onclick="cerrarSesion()">Cerrar Sesión</button>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <div class="container">
+            <h2 class="center-text">Ingreso de dispositivo</h2>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="id_bateria">Id de Dispositivo</label>
+                        <input type="text" id="id_bateria" class="form-control" disabled="true"/>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="nombreBateriaInput">Nombre del dispositivo</label>
+                        <input type="text" id="nombreBateriaInput" class="form-control"/>
+                    </div>
+                </div>
+                <!--                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="cantidadInput">Cantidad:</label>
+                                        <input type="number" id="cantidadInput" class="form-control"/>
+                                    </div>
+                                </div>-->
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="corrienteEsperaInput">Corriente en Espera:</label>
+                        <input type="number" id="corrienteEsperaInput" class="form-control"/>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="corrienteAlarmaInput">Corriente en Alarma:</label>
+                        <input type="number" id="corrienteAlarmaInput" class="form-control"/>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <!--                        <label style="min-height: 1.4em;" class="empty-label" for="button"></label>-->
+                        <button id="calcularButton" type="submit" class="btn btn-primary btn-block" onclick="calcularBateria()">Insertar</button>
+                    </div>
+                </div>
+            </div>
+
+
+            <h2 class="center-text">Resultados</h2>
+            <table id="tablaBateria" class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Nombre</th>
+                        <th>Corriente en Espera</th>
+                        <th>Corriente en Alarma</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
+
+
+
+
+
+
+
+
+
+        <script>
+            var selectBaterias = document.getElementById("selectBaterias");
+//            var tablaDispositivos = document.getElementById("tablaDispositivos").getElementsByTagName('tbody')[0];
+
+            window.onload = function () {
+                obtenerBaterias();
+                // Obtener el contenido del span con id "nicktext"
+                var nicktextElement = document.getElementById("nicktext");
+                var nicktextValue = nicktextElement.textContent;
+
+                // Mostrar el valor en una alerta
+                if (nicktextValue === "") {
+                    window.location.href = "/"; // Redirigir a la página "/"
+                }
+
+            };
+            function obtenerBaterias() {
+                fetch('/bateria')  // Realiza una solicitud GET a la ruta '/bateria'
+                        .then(response => response.json())  // Parsea la respuesta a JSON
+                        .then(baterias => {
+                            var tablaBaterias = document.getElementById('tablaBateria').getElementsByTagName('tbody')[0];
+
+                            // Limpiar la tabla antes de agregar los nuevos datos
+                            tablaBaterias.innerHTML = '';
+
+                            baterias.forEach(bateria => {
+                                var fila = tablaBaterias.insertRow();
+
+                                // Crear las celdas de la fila con los datos de la batería
+                                var idCell = fila.insertCell(0);
+                                var nombreCell = fila.insertCell(1);
+                                var corrienteEsperaCell = fila.insertCell(2);
+                                var corrienteAlarmaCell = fila.insertCell(3);
+                                var accionesCell = fila.insertCell(4); // Nueva celda para acciones
+
+                                // Llenar las celdas con los datos
+                                idCell.innerHTML = bateria.id_bateria; // Asegúrate de tener una propiedad 'id' en tus objetos de batería
+                                nombreCell.innerHTML = bateria.nombre;
+                                corrienteEsperaCell.innerHTML = bateria.corri_espera;
+                                corrienteAlarmaCell.innerHTML = bateria.corri_alarma;
+
+                                accionesCell.innerHTML = `
+                    <button class="btn btn-sm btn-primary" onclick="editarBateria(${bateria.id_bateria})">Editar</button>
+                    <button class="btn btn-sm btn-danger" onclick="eliminarBateria(${bateria.id_bateria})">Eliminar</button>
+                `;
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error en la solicitud:', error);
+                        });
+            }
+
+            function eliminarBateria(idBateria) {
+                fetch(`/bateria/${idBateria}`, {
+                    method: 'DELETE'
+                })
+                        .then(response => {
+                            if (response.ok) {
+                                alert('Batería eliminada correctamente');
+                                obtenerBaterias(); // Actualizar la tabla después de eliminar
+                            } else {
+                                console.log('Error al eliminar la batería');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error en la solicitud:', error);
+                        });
+            }
+
+            function calcularBateria() {
+                var idBateriaInput = document.getElementById("id_bateria").value;
+                var nombreInput = document.getElementById("nombreBateriaInput").value;
+                var corrienteEsperaInput = document.getElementById("corrienteEsperaInput").value;
+                var corrienteAlarmaInput = document.getElementById("corrienteAlarmaInput").value;
+
+                if (nombreInput === "" || corrienteEsperaInput === "" || corrienteAlarmaInput === "") {
+                    alert("Por favor, complete todos los campos.");
+                    return;
+                }
+                if (corrienteEsperaInput < 0 || corrienteAlarmaInput < 0) {
+                    alert("Por favor, ingrese un valor válido y no negativo.");
+                    return;
+                }
+
+
+
+
+
+                var bateria = {
+                    id_bateria: idBateriaInput,
+                    nombre: nombreInput,
+                    corri_espera: parseFloat(corrienteEsperaInput),
+                    corri_alarma: parseFloat(corrienteAlarmaInput),
+                };
+
+                if (idBateriaInput) {
+                    fetch(`/bateria`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(bateria)
+                    })
+                            .then(response => {
+                                if (response.ok) {
+                                    alert('Batería actualizada correctamente');
+                                    obtenerBaterias();
+                                    limpiarFormulario();
+                                } else {
+                                    console.log('Error al actualizar la batería');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error en la solicitud:', error);
+                            });
+                } else {
+                    fetch('/bateria', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(bateria)
+                    })
+                            .then(response => {
+                                if (response.ok) {
+                                    alert('Bateria insertada correctamente');
+                                    obtenerBaterias();
+                                } else {
+                                    console.log('Error al insertar la batería');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error en la solicitud:', error);
+                            });
+                }
+            }
+
+            function editarBateria(idBateria) {
+                // Realizar una solicitud GET para obtener los datos de la batería por su ID
+                fetch(`/bateria/${idBateria}`)
+                        .then(response => response.json())
+                        .then(bateria => {
+                            var idInput = document.getElementById("id_bateria");
+                            var nombreInput = document.getElementById("nombreBateriaInput");
+//                            var cantidadInput = document.getElementById("cantidadInput");
+                            var corrienteEsperaInput = document.getElementById("corrienteEsperaInput");
+                            var corrienteAlarmaInput = document.getElementById("corrienteAlarmaInput");
+
+                            idInput.value = bateria.id_bateria;
+                            nombreInput.value = bateria.nombre;
+//                            cantidadInput.value = bateria.cantidad;
+                            corrienteEsperaInput.value = bateria.corri_espera;
+                            corrienteAlarmaInput.value = bateria.corri_alarma;
+
+                            // Cambiar el texto del botón a "Actualizar"
+                            var botonCalcular = document.querySelector("button[type='submit']");
+                            botonCalcular.textContent = "Actualizar";
+
+                        })
+                        .catch(error => {
+                            console.error('Error en la solicitud:', error);
+                        });
+            }
+            function cerrarSesion() {
+                // Redirige a la página de inicio de sesión
+                window.location.href = "cerrar-sesion";
+            }
+
+            function limpiarFormulario() {
+                var idBateriaInput = document.getElementById("id_bateria");
+                var nombreBateriaInput = document.getElementById("nombreBateriaInput");
+                var corrienteEsperaInput = document.getElementById("corrienteEsperaInput");
+                var corrienteAlarmaInput = document.getElementById("corrienteAlarmaInput");
+
+                idBateriaInput.value = "";
+                nombreBateriaInput.value = "";
+                corrienteEsperaInput.value = "";
+                corrienteAlarmaInput.value = "";
+
+                var calcularButton = document.getElementById("calcularButton");
+                calcularButton.textContent = "Calcular";
+            }
+        </script>
+    </body>        
+</html>
